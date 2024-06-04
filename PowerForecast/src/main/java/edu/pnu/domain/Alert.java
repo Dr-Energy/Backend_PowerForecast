@@ -36,7 +36,7 @@ public class Alert {
 	private Region region;
 	
 	@Builder.Default
-	@Column(name = "alert_time")
+	@Column(name = "alert_time", nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)	// datatype지정(이 코드에서는 timestamp)
 	private Date alertTime = new Date();
 }

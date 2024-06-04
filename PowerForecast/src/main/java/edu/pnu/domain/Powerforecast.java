@@ -31,9 +31,9 @@ public class Powerforecast {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "powerforecast_id")
     private Long powerForecastId;
-	
-	@Column(name = "predicted_power")
-	private float predictedPower;
+
+	@Column(name = "predicted_power", nullable = false)
+	private double predictedPower;
 
 	@ManyToOne
 	@JoinColumn(name = "region_id", nullable = false)
@@ -41,5 +41,6 @@ public class Powerforecast {
 	
 	@Builder.Default
 	@Temporal(value = TemporalType.TIMESTAMP)	// datatype지정(이 코드에서는 timestamp)
+	@Column(nullable = false)
 	private Date time = new Date();
 }
