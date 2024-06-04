@@ -29,8 +29,8 @@ public class Member {
 	private Long seq;
 	@Column(nullable = false)
 	private String nickname;
-	@Column(nullable = false, unique = true)
-	private String id;
+	@Column(name="member_id", nullable = false, unique = true)
+	private String memberId;
 	@Column(nullable = false)
 	private String password;
 	@Column(nullable = false)
@@ -39,7 +39,7 @@ public class Member {
 	@Enumerated(EnumType.STRING)
 	@Builder.Default
     @Column(nullable = false)
-	private Role role = Role.USER;
+	private Role role = Role.ROLE_USER;
 	
 	@ManyToOne
 	@JoinColumn(name = "region_id", nullable = false)
