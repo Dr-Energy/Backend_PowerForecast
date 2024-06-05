@@ -15,7 +15,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pnu.DTO.MemberDTO;
 import edu.pnu.domain.Member;
+import edu.pnu.persistence.MemberRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 	// 인증 객체
 	private final AuthenticationManager authenticationManager;
+	private final MemberRepository memberRepository;
 	
 	// POST/Login 요청이 왔을 때 인증을 시도하는 메소드
 	@Override
@@ -66,6 +69,23 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 						.sign(Algorithm.HMAC256("edu.pnu.jwt"));
 		// 응답 헤더에 추가
 		response.addHeader("Authorization", "Bearer " + token);
+		
+		Member member = memberRepository.findByMemberId(user.getUsername()).get();
+		MemberDTO memberDTO = MemberDTO.builder()
+				.nickname(member.getNickname())
+				.region(member.getRegion())
+				.role(member.getRole())
+				.build();
+		
+		// 응답 본문에 닉네임 정보를 JSON 형식으로 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseBody = objectMapper.writeValueAsString(memberDTO);
+
+        // 응답 본문에 JSON 데이터 전송
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(responseBody);
+	
 		response.setStatus(HttpStatus.OK.value());
 	}
 }

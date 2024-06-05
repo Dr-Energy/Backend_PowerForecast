@@ -8,4 +8,6 @@ import edu.pnu.domain.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 	Optional<Member> findByMemberId(String memberId);
+	Member findByPhoneNumber(String phoneNum);
+	Member findByMemberIdAndPhoneNumber(String id, String phoneNum);
 }

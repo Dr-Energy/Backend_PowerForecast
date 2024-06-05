@@ -42,7 +42,7 @@ public class SecurityConfig {
 		 
 		 http.sessionManagement(sm->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		 
-		 http.addFilter(new JWTAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()));
+		 http.addFilter(new JWTAuthenticationFilter(authenticationConfiguration.getAuthenticationManager(), memberRepository));
 		 
 		 // 스프링 시큐리티가 등록한 필터들 중에서 AuthorizationFilter 앞에 앞에서 작성한 필터를 삽입한다.
 		 http.addFilterBefore(new JWTAuthorizationFilter(memberRepository), AuthorizationFilter.class);
