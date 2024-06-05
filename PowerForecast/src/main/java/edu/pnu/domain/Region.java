@@ -28,4 +28,6 @@ public class Region {
 	private String sido;
 	private String gugun;
 	private String eupmyeondong;
+	private String latitude;
+	private String longitude; 
 }
