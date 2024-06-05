@@ -14,12 +14,20 @@ public class RegionTest {
 	@Autowired
 	RegionRepository regionRepository;
 	
-	@Test
+//	@Test
 	public void getRegionList() {
 		List<Region> regions = regionRepository.findAll();
 		
 		for(int i=0; i<=20; i++) {
 			System.out.println(regions.get(i));
 		}
+	}
+	
+	@Test
+	public void findBySidoAndGugunAndEupmyeondong() {
+		Region region = regionRepository.findBySidoAndGugunAndEupmyeondong(
+				"서울특별시","종로구", "삼청동").get();
+		
+		System.out.println(region);
 	}
 }
