@@ -58,12 +58,12 @@ public class MemberService {
 		}
 	}
 	
-	public MemberDTO getMemberInfo(String id) {
-		Member mem = memberRepo.findByMemberId(id).get();
-		MemberDTO dto = MemberDTO.builder()
-				.nickname(mem.getNickname())
-				.region(mem.getRegion())
-				.build();
-		return dto;
-	}
+//	public MemberDTO getMemberInfo(String id) {
+//		Member mem = memberRepo.findByMemberId(id).get();
+//		MemberDTO dto = MemberDTO.builder()
+//				.nickname(mem.getNickname())
+//				.region(mem.getRegion())
+//				.build();
+//		return dto;
+//	}
 }

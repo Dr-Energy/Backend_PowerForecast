@@ -28,6 +28,8 @@ public class Region {
 	private String sido;
 	private String gugun;
 	private String eupmyeondong;
-	private String latitude;
-	private String longitude; 
+	@Column(name="grid_x")
+	private String gridX;
+	@Column(name="grid_y")
+	private String gridY; 
 }

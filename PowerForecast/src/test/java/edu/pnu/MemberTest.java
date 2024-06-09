@@ -21,7 +21,7 @@ public class MemberTest {
 	@Autowired
 	RegionRepository regionRepo;
 	
-	@Test
+//	@Test
 	public void addMemberList() {
 		Region region = regionRepo.findById(1L).get();
 		
@@ -51,7 +51,7 @@ public class MemberTest {
 		memberRepo.save(mem2);
 	}
 	
-//	@Test
+	@Test
 	public void getMemberList() {
 		List<Member> members = memberRepo.findAll();
 		
