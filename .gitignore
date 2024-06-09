@@ -224,3 +224,5 @@ README.html
 *.iml
 .idea
 .exercism
+
+application-API-KEY.properties
