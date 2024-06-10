@@ -5,7 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import edu.pnu.DTO.MemberDTO;
+import edu.pnu.DTO.MyPageDTO;
 import edu.pnu.domain.Member;
 import edu.pnu.domain.Region;
 import edu.pnu.persistence.MemberRepository;
@@ -23,7 +23,7 @@ public class MemberService {
 	
 	public String addMember(Member member) {
 		Region region = member.getRegion();
-		region = regionRepo.findBySidoAndGugunAndEupmyeondong(region.getSido()+"11", region.getGugun(), region.getEupmyeondong())
+		region = regionRepo.findBySidoAndGugunAndEupmyeondong(region.getSido(), region.getGugun(), region.getEupmyeondong())
 						.orElse(null);
 		
 		if(region == null)
@@ -55,6 +55,50 @@ public class MemberService {
 			mem.setPassword(encoder.encode("abcd"));
 			memberRepo.save(mem);
 			return "비밀번호가 변경되었습니다";
+		}
+	}
+	
+	public MyPageDTO getMemberInfo(String memberId) {
+		Member mem = memberRepo.findByMemberId(memberId).orElse(null);
+		
+		if(mem == null)
+			return null;
+		else {			
+			MyPageDTO mypageDTO = MyPageDTO.builder()
+					.nickname(mem.getNickname())
+					.memberId(mem.getMemberId())
+					.phoneNumber(mem.getPhoneNumber())
+					.region(mem.getRegion())
+					.build(); 
+			return mypageDTO;
+		}
+
+	}
+	
+	public Member updateMemberInfo(MyPageDTO mypageDTO) {
+		Member mem = memberRepo.findByMemberId(mypageDTO.getMemberId()).orElse(null);
+		Region prevRegion = mypageDTO.getRegion();
+		Region region = regionRepo.findBySidoAndGugunAndEupmyeondong(prevRegion.getSido(), prevRegion.getGugun(), prevRegion.getEupmyeondong()).orElse(null);
+		
+		if(mem == null || region == null)
+			return null;
+		else {			
+			mem.setNickname(mypageDTO.getNickname());
+			mem.setPhoneNumber(mypageDTO.getPhoneNumber());
+			mem.setRegion(region);
+			memberRepo.save(mem);
+			return mem;
+		}
+	}
+	
+	public Member deleteMember(String memberId) {
+		Member mem = memberRepo.findByMemberId(memberId).orElse(null);
+		
+		if(mem == null)
+			return null;
+		else {			
+			memberRepo.delete(mem);
+			return mem;
 		}
 	}
 	
