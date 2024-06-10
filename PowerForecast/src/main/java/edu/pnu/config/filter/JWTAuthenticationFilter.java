@@ -75,6 +75,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.nickname(member.getNickname())
 				.region(member.getRegion())
 				.role(member.getRole())
+				.memberId(member.getMemberId())
 				.build();
 		
 		// 응답 본문에 닉네임 정보를 JSON 형식으로 추가

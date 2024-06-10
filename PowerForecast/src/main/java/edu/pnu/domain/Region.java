@@ -32,4 +32,6 @@ public class Region {
 	private String gridX;
 	@Column(name="grid_y")
 	private String gridY; 
+	private String longitude;
+	private String latitude;
 }
