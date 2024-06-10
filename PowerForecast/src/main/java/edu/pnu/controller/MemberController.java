@@ -2,12 +2,15 @@ package edu.pnu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.pnu.DTO.MyPageDTO;
@@ -77,12 +80,15 @@ public class MemberController {
 	}
 	
 	// 로그인세션정보확인용URL
-	/*
-	 * @GetMapping("/auth") public @ResponseBody ResponseEntity<?>
-	 * auth(@AuthenticationPrincipal User user){ if(user == null) { return
-	 * ResponseEntity.ok("로그인 상태가 아닙니다."); }else {
-	 * 
-	 * return ResponseEntity.ok(user); } }
-	 */
+	
+	@GetMapping("/auth") 
+	public @ResponseBody ResponseEntity<?> auth(@AuthenticationPrincipal User user){
+		if(user == null) { 
+			return ResponseEntity.ok("로그인 상태가 아닙니다."); 
+		}
+		else {
+			return ResponseEntity.ok(user); 
+		} 
+	}
 
 }

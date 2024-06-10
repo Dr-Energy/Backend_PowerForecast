@@ -36,21 +36,6 @@ public class WeatherService {
 		String url = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?serviceKey=wlWGq5R0p7W%2B4eib5opqyqWDaIFIfE%2BoRVSPx%2FBOq1G43JSfe2DY2wShbIqcrIY45gcNxwqFAEO9sxh89%2FQhrQ%3D%3D&pageNo=1&numOfRows=1000&dataType=json&base_date=20240610&base_time=0500&nx=55&ny=127";
         
         System.out.println(url);
-//		 UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst")
-//		            .queryParam("serviceKey", "wlWGq5R0p7W+4eib5opqyqWDaIFIfE+oRVSPx/BOq1G43JSfe2DY2wShbIqcrIY45gcNxwqFAEO9sxh89/QhrQ==")
-//		            .queryParam("pageNo", 1)
-//		            .queryParam("numOfRows", 1000)
-//		            .queryParam("dataType", "JSON")
-//		            .queryParam("base_date", "20240609")
-//		            .queryParam("base_time", "1700")
-//		            .queryParam("nx", nx)
-//		            .queryParam("ny", ny)
-//		            .queryParam("sido", sido)
-//		            .queryParam("gugun", gugun)
-//		            .queryParam("eupmyeondong", eupmyeondong);
-//		// URL을 문자열로 변환
-//		    String url = builder.toUriString();
-//		    System.out.println(url);
         try {
 //            return restTemplate.getForObject(url, String.class);
             System.out.println(restTemplate.getForObject(url, String.class));
