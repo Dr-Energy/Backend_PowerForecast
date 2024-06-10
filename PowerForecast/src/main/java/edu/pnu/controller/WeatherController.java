@@ -1,5 +1,8 @@
 package edu.pnu.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +19,7 @@ public class WeatherController {
 	@GetMapping("/main/weather")
 	public void getWeather(@RequestParam String sido,
             			   @RequestParam String gugun,
-            			   @RequestParam String eupmyeondong) {
+            			   @RequestParam String eupmyeondong) throws UnsupportedEncodingException, URISyntaxException {
 		System.out.println(sido+","+gugun+","+eupmyeondong);
 		try {
 			System.out.println(weatherService.getWeatherData(sido, gugun, eupmyeondong));            
