@@ -23,11 +23,31 @@ public class AlertTest {
 	public void addAlert() {
 		Region region = regionRepo.findById(1L).get();
 		
-		Alert alert = Alert.builder()
-				.region(region)
-				.build();
+		for(int i=1; i<=5; i++) {			
+			Alert alert = Alert.builder()
+					.region(region)
+					.build();
+			
+			alertRepo.save(alert);
+		}
 		
-		alertRepo.save(alert);
+		region = regionRepo.findById(3L).get();
+		for(int i=1; i<=5; i++) {			
+			Alert alert = Alert.builder()
+					.region(region)
+					.build();
+			
+			alertRepo.save(alert);
+		}
+		
+		region = regionRepo.findById(15L).get();
+		for(int i=1; i<=5; i++) {			
+			Alert alert = Alert.builder()
+					.region(region)
+					.build();
+			
+			alertRepo.save(alert);
+		}
 	}
 	
 	@Test

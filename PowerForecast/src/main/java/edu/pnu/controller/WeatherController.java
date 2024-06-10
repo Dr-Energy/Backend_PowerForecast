@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 
-import edu.pnu.domain.Region;
 import edu.pnu.service.WeatherService;
 
 @RestController

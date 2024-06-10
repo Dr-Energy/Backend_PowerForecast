@@ -1,6 +1,8 @@
 package edu.pnu.DTO;
 
-import edu.pnu.domain.Role;
+import java.util.Date;
+
+import edu.pnu.domain.Region;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,9 +14,8 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberDTO {
-	private String nickname;
-	private Long regionId;
-	private Role role;
-	private String memberId;
+public class RegionDTO {
+	private String sido;
+	private String gugun;
+	private String eupmyeondong;
 }

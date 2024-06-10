@@ -73,7 +73,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		Member member = memberRepository.findByMemberId(user.getUsername()).get();
 		MemberDTO memberDTO = MemberDTO.builder()
 				.nickname(member.getNickname())
-				.region(member.getRegion())
+				.regionId(member.getRegion().getRegionId())
 				.role(member.getRole())
 				.memberId(member.getMemberId())
 				.build();
