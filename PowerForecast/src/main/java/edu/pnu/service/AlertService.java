@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import edu.pnu.DTO.AlertDTO;
 import edu.pnu.DTO.RegionDTO;
 import edu.pnu.domain.Alert;
+import edu.pnu.domain.AlertType;
 import edu.pnu.domain.Region;
 import edu.pnu.persistence.AlertRepository;
 import edu.pnu.persistence.RegionRepository;
@@ -36,6 +37,8 @@ public class AlertService {
 			AlertDTO alertDTO = AlertDTO.builder()
 							.region(regionDTO)
 							.alertTime(alert.getAlertTime())
+							.alertType(alert.getAlertType() == AlertType.ABNORMAL ? "이상"
+									: alert.getAlertType() == AlertType.INCREASE ? "상승" : "감소")
 							.build();
 			result.add(alertDTO);
 		}
@@ -58,6 +61,8 @@ public class AlertService {
 			AlertDTO alertDTO = AlertDTO.builder()
 							.region(regionDTO)
 							.alertTime(alert.getAlertTime())
+							.alertType(alert.getAlertType() == AlertType.ABNORMAL ? "이상"
+									: alert.getAlertType() == AlertType.INCREASE ? "상승" : "감소")
 							.build();
 			result.add(alertDTO);
 		}
@@ -81,6 +86,8 @@ public class AlertService {
 			AlertDTO alertDTO = AlertDTO.builder()
 							.region(regionDTO)
 							.alertTime(alert.getAlertTime())
+							.alertType(alert.getAlertType() == AlertType.ABNORMAL ? "이상"
+									: alert.getAlertType() == AlertType.INCREASE ? "상승" : "감소")
 							.build();
 			result.add(alertDTO);
 		}

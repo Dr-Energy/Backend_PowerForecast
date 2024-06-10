@@ -4,6 +4,8 @@ import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,4 +41,9 @@ public class Alert {
 	@Column(name = "alert_time", nullable = false)
 	@Temporal(value = TemporalType.TIMESTAMP)	// datatype지정(이 코드에서는 timestamp)
 	private Date alertTime = new Date();
+	
+	@Enumerated(EnumType.STRING)
+	@Builder.Default
+    @Column(name = "alert_type",nullable = false)
+	private AlertType alertType = AlertType.ABNORMAL;
 }

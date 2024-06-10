@@ -18,4 +18,5 @@ import lombok.Setter;
 public class AlertDTO {
 	private RegionDTO region;
 	private Date alertTime;
+	private String alertType;
 }
