@@ -41,7 +41,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		
 		try {
 			member = mapper.readValue(request.getInputStream(),Member.class);
-			System.out.println(member);
+//			System.out.println(member);
 			// Security에게 로그인 요처에 필요한 객체 생성
 			Authentication authToken = new UsernamePasswordAuthenticationToken(member.getMemberId(), member.getPassword());
 			

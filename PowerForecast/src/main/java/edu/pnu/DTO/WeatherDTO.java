@@ -11,8 +11,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegionDTO {
-	private String sido;
-	private String gugun;
-	private String eupmyeondong;
+public class WeatherDTO {
+	private String category;
+	private String value;
 }
