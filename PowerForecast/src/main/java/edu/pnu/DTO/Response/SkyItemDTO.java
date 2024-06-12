@@ -3,7 +3,7 @@ package edu.pnu.DTO.Response;
 import lombok.Data;
 
 @Data
-public class WeatherItemDTO {
+public class SkyItemDTO {
 	  private String baseDate;
       private String baseTime;
       private String category;

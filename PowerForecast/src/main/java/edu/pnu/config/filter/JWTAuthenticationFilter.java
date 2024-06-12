@@ -3,6 +3,7 @@ package edu.pnu.config.filter;
 import java.io.IOException;
 import java.util.Date;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,7 +69,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 						.withClaim("username", user.getUsername())
 						.sign(Algorithm.HMAC256("edu.pnu.jwt"));
 		// 응답 헤더에 추가
-		response.addHeader("Authorization", "Bearer " + token);
+		response.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 		
 		Member member = memberRepository.findByMemberId(user.getUsername()).get();
 		MemberDTO memberDTO = MemberDTO.builder()

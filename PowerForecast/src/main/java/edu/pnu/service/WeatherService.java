@@ -14,14 +14,22 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import edu.pnu.DTO.Response.WeatherApiResponseDTO;
-import edu.pnu.DTO.Response.WeatherItemDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.pnu.DTO.WeatherDTO;
+import edu.pnu.DTO.Response.SkyItemDTO;
 import edu.pnu.domain.Region;
 import edu.pnu.persistence.RegionRepository;
 
@@ -39,8 +47,8 @@ public class WeatherService {
 	private String nx;
 	private String ny;
 
-	public WeatherApiResponseDTO getWeatherData(String sido, String gugun, String eupmyeondong)
-			throws UnsupportedEncodingException, URISyntaxException {
+	public ResponseEntity<?> getWeatherData(String sido, String gugun, String eupmyeondong)
+			throws UnsupportedEncodingException, URISyntaxException, JsonMappingException, JsonProcessingException {
 		Region regionInfo = regionRepository.findBySidoAndGugunAndEupmyeondong(sido, gugun, eupmyeondong).get();
 		nx = regionInfo.getGridX();
 		ny = regionInfo.getGridY();
@@ -58,25 +66,22 @@ public class WeatherService {
 		headers.setContentType(new MediaType("application", "JSON", Charset.forName("UTF-8")));
 		URI uri = createURI(baseDate, baseTime);
 		
-		
-
 		try {
-//          return restTemplate.getForObject(uri, String.class);
-//			System.out.println(restTemplate.getForObject(uri, String.class));
-//			ResponseEntity<WeatherApiResponseDTO> response = restTemplate.getForEntity(uri, WeatherApiResponseDTO.class);
-			WeatherApiResponseDTO response = restTemplate.getForObject(uri, WeatherApiResponseDTO.class);
-			List<WeatherItemDTO> items = response.getResponse()
-									.getBody()
-									.getItems()
-									.getItem();
-			logWeatherData(items, curDate, curTime);
-			return null;
+			ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
+			String jsonRes = response.getBody();
+			
+			// ObjectMapper로 JSON 문자열을 객체로 받아오기
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode root = objectMapper.readTree(jsonRes);
+		    JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+		    List<SkyItemDTO> items = objectMapper.readValue(itemsNode.toString(), new TypeReference<List<SkyItemDTO>>() {});
+
+			WeatherDTO weather = filterWeatherData(items, curDate, curTime);
+			return ResponseEntity.ok(weather);
 		} catch (HttpClientErrorException e) {
-//			return ResponseEntity.status(e.getStatusCode()).body(null);
-			return null;
+			return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
 		} catch (RestClientException e) {
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-			return null;
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
 	}
 
@@ -119,10 +124,12 @@ public class WeatherService {
 		return adjustedTime;
 	}
 	
-	private void logWeatherData(List<WeatherItemDTO> items, String date, String time) {
+	private WeatherDTO filterWeatherData(List<SkyItemDTO> items, String date, String time) {
 		HashMap<String, String> filterData = new HashMap<>();
+		WeatherDTO weather;
 		
-        for (WeatherItemDTO item : items) {
+        for (SkyItemDTO item : items) {
+        	System.out.println(item);
             if (item.getFcstDate().equals(date) 
             	&& item.getFcstTime().equals(time) 
             	&& (item.getCategory().equals("SKY") || item.getCategory().equals("PTY"))) {
@@ -131,7 +138,19 @@ public class WeatherService {
                 filterData.put(item.getCategory(), item.getFcstValue());
             }
         }
+
+        if(filterData.get("PTY").equals("0")) {
+        	weather = WeatherDTO.builder()
+        			.category("SKY")
+        			.value(filterData.get("SKY"))
+        			.build();
+        } else {
+        	weather = WeatherDTO.builder()
+        			.category("PTY")
+        			.value(filterData.get("PTY"))
+        			.build();
+        }
         
-        
+        return weather;
     }
 }

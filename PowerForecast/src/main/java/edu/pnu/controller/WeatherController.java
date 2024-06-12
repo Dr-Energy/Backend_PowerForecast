@@ -4,10 +4,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import edu.pnu.service.WeatherService;
 
@@ -17,14 +21,14 @@ public class WeatherController {
 	private WeatherService weatherService;
 	
 	@GetMapping("/main/weather")
-	public void getWeather(@RequestParam String sido,
+	public ResponseEntity<?> getWeather(@RequestParam String sido,
             			   @RequestParam String gugun,
-            			   @RequestParam String eupmyeondong) throws UnsupportedEncodingException, URISyntaxException {
+            			   @RequestParam String eupmyeondong) throws UnsupportedEncodingException, URISyntaxException, JsonMappingException, JsonProcessingException {
 		System.out.println(sido+","+gugun+","+eupmyeondong);
 		try {
-			System.out.println(weatherService.getWeatherData(sido, gugun, eupmyeondong));            
+			return weatherService.getWeatherData(sido, gugun, eupmyeondong);            
         } catch (RestClientException e) {
-            System.out.println("Error fetching weather data: " + e.getMessage());
+        	return ResponseEntity.badRequest().body(e.getMessage());
         }
 	}
 	
