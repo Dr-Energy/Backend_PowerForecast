@@ -19,21 +19,21 @@ public class AlertController {
 	@Autowired
 	AlertService alertService;
 	
-	@GetMapping("/main/alerts/history")
+	@GetMapping("/history/all")
 	public ResponseEntity<?> getAlertList(){
 		List<AlertDTO> alertList = alertService.getAlertList();
 		
 		return ResponseEntity.ok(alertList);
 	}
 	
-	@GetMapping("/main/alerts/history/region/{regionId}")
+	@GetMapping("/history/{regionId}")
 	public ResponseEntity<?> getAlertRegionList(@PathVariable Long regionId){
 		List<AlertDTO> alertList = alertService.getAlertRegionList(regionId);
 		
 		return ResponseEntity.ok(alertList);
 	}
 	
-	@GetMapping("/main/alerts/history/region")
+	@GetMapping("/history/region")
 	public ResponseEntity<?> getWeather(@RequestParam String sido,
             			   @RequestParam String gugun,
             			   @RequestParam String eupmyeondong) {

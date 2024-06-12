@@ -14,4 +14,9 @@ import lombok.Setter;
 public class WeatherDTO {
 	private String category;
 	private String value;
+	private String temp;
+	private String humidity;
+	private String rain;
+	private String bodyTemp;
+	
 }

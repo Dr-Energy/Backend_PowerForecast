@@ -24,7 +24,7 @@ public class WeatherController {
 	public ResponseEntity<?> getWeather(@RequestParam String sido,
             			   @RequestParam String gugun,
             			   @RequestParam String eupmyeondong) throws UnsupportedEncodingException, URISyntaxException, JsonMappingException, JsonProcessingException {
-		System.out.println(sido+","+gugun+","+eupmyeondong);
+//		System.out.println(sido+","+gugun+","+eupmyeondong);
 		try {
 			return weatherService.getWeatherData(sido, gugun, eupmyeondong);            
         } catch (RestClientException e) {
