@@ -1,6 +1,5 @@
 package edu.pnu.DTO;
 
-import edu.pnu.domain.Region;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +15,5 @@ public class MyPageDTO {
 	private String nickname;
 	private String memberId;
 	private String phoneNumber;
-	private Region region;
-//	private String region;
+	private RegionDTO region;
 }

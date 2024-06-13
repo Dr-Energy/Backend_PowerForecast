@@ -36,7 +36,7 @@ public class MemberController {
 	public ResponseEntity<?> findId(@RequestBody Member member){
 		String result = memberService.findId(member);
 		
-		if(result.equals("잘못된 입력입니다"))
+		if(result.equals("찾을 수 없는 회원입니다"))
 			return ResponseEntity.badRequest().body(result);
 		else
 			return ResponseEntity.ok(result);
@@ -46,7 +46,7 @@ public class MemberController {
 	public ResponseEntity<?> findPassword(@RequestBody Member member){
 		String result = memberService.findPassword(member);
 		
-		if(result.equals("잘못된 입력입니다"))
+		if(result.equals("찾을 수 없는 회원입니다"))
 			return ResponseEntity.badRequest().body(result);
 		else
 			return ResponseEntity.ok(result);
@@ -62,8 +62,8 @@ public class MemberController {
 	}
 	
 	@PutMapping("/user/profile")
-	public ResponseEntity<?> updateMemberInfo(@RequestBody MyPageDTO myPageDTO){
-		Member result = memberService.updateMemberInfo(myPageDTO);
+	public ResponseEntity<?> updateMemberInfo(@RequestBody Member Member){
+		Member result = memberService.updateMemberInfo(Member);
 		if(result == null)
 			return ResponseEntity.badRequest().body("잘못된 요청입니다.");
 		else

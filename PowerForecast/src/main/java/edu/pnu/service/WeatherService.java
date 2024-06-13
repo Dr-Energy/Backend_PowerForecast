@@ -62,11 +62,54 @@ public class WeatherService {
 		String[] dates = getDates();
         String curDate = dates[0];
         String baseDate = dates[1];
-//        System.out.println("Current Date: " + curDate);
-//        System.out.println("Previous Date: " + baseDate);
+
 		String baseTime = "2300";
 		String curTime = getCurrentTimeAdjusted();
-//		System.out.println(curTime);
+
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(new MediaType("application", "JSON", Charset.forName("UTF-8")));
+		URI uri = createAWSURI(baseDate, baseTime);
+		URI uri2 = createWeatherURI(curDate, curTime);
+		System.out.println(uri2);
+		
+		try {
+			ResponseEntity<String> response1 = restTemplate.getForEntity(uri, String.class);
+			ResponseEntity<String> response2 = restTemplate.getForEntity(uri2, String.class);
+			
+			String jsonRes1 = response1.getBody();
+			String jsonRes2 = response2.getBody();
+			
+			// ObjectMapper로 JSON 문자열을 객체로 받아오기
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode root = objectMapper.readTree(jsonRes1);
+		    JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+		    List<SkyItemDTO> items = objectMapper.readValue(itemsNode.toString(), new TypeReference<List<SkyItemDTO>>() {});
+
+			WeatherDTO weather = filterWeatherData(items, curDate, curTime);
+			weather = parseWeatherData(jsonRes2, weather);
+			return ResponseEntity.ok(weather);
+		} catch (HttpClientErrorException e) {
+			return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+		} catch (RestClientException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+		}
+	}
+	
+	public ResponseEntity<?> getWeatherData(Long regionId)
+			throws UnsupportedEncodingException, URISyntaxException, JsonMappingException, JsonProcessingException {
+		Region regionInfo = regionRepository.findById(regionId).get();
+		nx = regionInfo.getGridX();
+		ny = regionInfo.getGridY();
+		lon = regionInfo.getLongitude();
+		lat = regionInfo.getLatitude();
+
+		String[] dates = getDates();
+        String curDate = dates[0];
+        String baseDate = dates[1];
+
+		String baseTime = "2300";
+		String curTime = getCurrentTimeAdjusted();
 
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();

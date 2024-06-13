@@ -33,7 +33,7 @@ public class AlertController {
 		return ResponseEntity.ok(alertList);
 	}
 	
-	@GetMapping("/history/region")
+	@GetMapping("/history")
 	public ResponseEntity<?> getWeather(@RequestParam String sido,
             			   @RequestParam String gugun,
             			   @RequestParam String eupmyeondong) {

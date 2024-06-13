@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import edu.pnu.DTO.MyPageDTO;
+import edu.pnu.DTO.RegionDTO;
 import edu.pnu.domain.Member;
 import edu.pnu.domain.Region;
 import edu.pnu.persistence.MemberRepository;
@@ -64,28 +65,35 @@ public class MemberService {
 		if(mem == null)
 			return null;
 		else {			
+			RegionDTO regionDTO = RegionDTO.builder()
+								.sido(mem.getRegion().getSido())
+								.gugun(mem.getRegion().getGugun())
+								.eupmyeondong(mem.getRegion().getEupmyeondong())
+								.build();
+								
 			MyPageDTO mypageDTO = MyPageDTO.builder()
 					.nickname(mem.getNickname())
 					.memberId(mem.getMemberId())
 					.phoneNumber(mem.getPhoneNumber())
-					.region(mem.getRegion())
+					.region(regionDTO)
 					.build(); 
 			return mypageDTO;
 		}
 
 	}
 	
-	public Member updateMemberInfo(MyPageDTO mypageDTO) {
-		Member mem = memberRepo.findByMemberId(mypageDTO.getMemberId()).orElse(null);
-		Region prevRegion = mypageDTO.getRegion();
+	public Member updateMemberInfo(Member member) {
+		Member mem = memberRepo.findByMemberId(member.getMemberId()).orElse(null);
+		Region prevRegion = member.getRegion();
 		Region region = regionRepo.findBySidoAndGugunAndEupmyeondong(prevRegion.getSido(), prevRegion.getGugun(), prevRegion.getEupmyeondong()).orElse(null);
 		
 		if(mem == null || region == null)
 			return null;
 		else {			
-			mem.setNickname(mypageDTO.getNickname());
-			mem.setPhoneNumber(mypageDTO.getPhoneNumber());
+			mem.setNickname(member.getNickname());
+			mem.setPhoneNumber(member.getPhoneNumber());
 			mem.setRegion(region);
+			mem.setPassword(encoder.encode(member.getPassword()));
 			memberRepo.save(mem);
 			return mem;
 		}
