@@ -2,10 +2,10 @@ package edu.pnu.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import edu.pnu.DTO.AlertDTO;
 import edu.pnu.DTO.RegionDTO;
@@ -71,7 +71,14 @@ public class AlertService {
 	}
 	
 	public List<AlertDTO> getAlertRegionList(String sido, String gugun, String eupmyeondong){
-		Long regionId = regionRepository.findBySidoAndGugunAndEupmyeondong(sido, gugun, eupmyeondong).get().getRegionId();
+		Optional<Region> regionOptional = regionRepository.findBySidoAndGugunAndEupmyeondong(sido, gugun, eupmyeondong);
+
+	    if (!regionOptional.isPresent()) {
+	        // 지역 정보를 찾지 못한 경우 빈 리스트 반환
+	        return new ArrayList<>();
+	    }
+
+	    Long regionId = regionOptional.get().getRegionId();
 		List<Alert> alertList = alertRepository.findAllByRegionRegionId(regionId);
 		List<AlertDTO> result = new ArrayList<>();
 		
