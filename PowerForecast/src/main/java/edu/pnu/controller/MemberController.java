@@ -32,6 +32,12 @@ public class MemberController {
 			return ResponseEntity.ok(result);
 	}
 	
+	@GetMapping("/checkId/{memberId}")
+    public ResponseEntity<Boolean> checkMemberId(@PathVariable String memberId) {
+        boolean isUsernameAvailable = memberService.isMemberIdAvailable(memberId);
+        return ResponseEntity.ok(isUsernameAvailable);
+    }
+	
 	@PostMapping("/user/find/id")
 	public ResponseEntity<?> findId(@RequestBody Member member){
 		String result = memberService.findId(member);

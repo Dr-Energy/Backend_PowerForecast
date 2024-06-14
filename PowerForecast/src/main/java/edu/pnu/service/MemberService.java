@@ -18,16 +18,16 @@ public class MemberService {
 	RegionRepository regionRepo;
 	@Autowired
 	MemberRepository memberRepo;
-	
+
 	PasswordEncoder encoder = new BCryptPasswordEncoder();
-	
-	
+
 	public String addMember(Member member) {
 		Region region = member.getRegion();
-		region = regionRepo.findBySidoAndGugunAndEupmyeondong(region.getSido(), region.getGugun(), region.getEupmyeondong())
-						.orElse(null);
-		
-		if(region == null)
+		region = regionRepo
+				.findBySidoAndGugunAndEupmyeondong(region.getSido(), region.getGugun(), region.getEupmyeondong())
+				.orElse(null);
+
+		if (region == null)
 			return "잘못된 입력입니다";
 		else {
 			member.setPassword(encoder.encode(member.getPassword()));
@@ -36,21 +36,29 @@ public class MemberService {
 			return "등록되었습니다";
 		}
 	}
-	
+
+	public boolean isMemberIdAvailable(String memberId) {
+		Member mem = memberRepo.existsByMemberId(memberId);
+		if(mem == null)
+			return true;
+		else
+			return false;
+	}
+
 	public String findId(Member member) {
 		Member mem = memberRepo.findByPhoneNumber(member.getPhoneNumber());
-		
-		if(mem == null)
+
+		if (mem == null)
 			return "찾을 수 없는 회원입니다";
 		else {
 			return mem.getMemberId();
 		}
 	}
-	
+
 	public String findPassword(Member member) {
 		Member mem = memberRepo.findByMemberIdAndPhoneNumber(member.getMemberId(), member.getPhoneNumber());
-		
-		if(mem == null)
+
+		if (mem == null)
 			return "찾을 수 없는 회원입니다";
 		else {
 			mem.setPassword(encoder.encode("abcd"));
@@ -58,38 +66,32 @@ public class MemberService {
 			return "비밀번호가 변경되었습니다";
 		}
 	}
-	
+
 	public MyPageDTO getMemberInfo(String memberId) {
 		Member mem = memberRepo.findByMemberId(memberId).orElse(null);
-		
-		if(mem == null)
+
+		if (mem == null)
 			return null;
-		else {			
-			RegionDTO regionDTO = RegionDTO.builder()
-								.sido(mem.getRegion().getSido())
-								.gugun(mem.getRegion().getGugun())
-								.eupmyeondong(mem.getRegion().getEupmyeondong())
-								.build();
-								
-			MyPageDTO mypageDTO = MyPageDTO.builder()
-					.nickname(mem.getNickname())
-					.memberId(mem.getMemberId())
-					.phoneNumber(mem.getPhoneNumber())
-					.region(regionDTO)
-					.build(); 
+		else {
+			RegionDTO regionDTO = RegionDTO.builder().sido(mem.getRegion().getSido()).gugun(mem.getRegion().getGugun())
+					.eupmyeondong(mem.getRegion().getEupmyeondong()).build();
+
+			MyPageDTO mypageDTO = MyPageDTO.builder().nickname(mem.getNickname()).memberId(mem.getMemberId())
+					.phoneNumber(mem.getPhoneNumber()).region(regionDTO).build();
 			return mypageDTO;
 		}
 
 	}
-	
+
 	public Member updateMemberInfo(Member member) {
 		Member mem = memberRepo.findByMemberId(member.getMemberId()).orElse(null);
 		Region prevRegion = member.getRegion();
-		Region region = regionRepo.findBySidoAndGugunAndEupmyeondong(prevRegion.getSido(), prevRegion.getGugun(), prevRegion.getEupmyeondong()).orElse(null);
-		
-		if(mem == null || region == null)
+		Region region = regionRepo.findBySidoAndGugunAndEupmyeondong(prevRegion.getSido(), prevRegion.getGugun(),
+				prevRegion.getEupmyeondong()).orElse(null);
+
+		if (mem == null || region == null)
 			return null;
-		else {			
+		else {
 			mem.setNickname(member.getNickname());
 			mem.setPhoneNumber(member.getPhoneNumber());
 			mem.setRegion(region);
@@ -98,18 +100,18 @@ public class MemberService {
 			return mem;
 		}
 	}
-	
+
 	public Member deleteMember(String memberId) {
 		Member mem = memberRepo.findByMemberId(memberId).orElse(null);
-		
-		if(mem == null)
+
+		if (mem == null)
 			return null;
-		else {			
+		else {
 			memberRepo.delete(mem);
 			return mem;
 		}
 	}
-	
+
 //	public MemberDTO getMemberInfo(String id) {
 //		Member mem = memberRepo.findByMemberId(id).get();
 //		MemberDTO dto = MemberDTO.builder()

@@ -51,7 +51,7 @@ public class MemberTest {
 		memberRepo.save(mem2);
 	}
 	
-	@Test
+//	@Test
 	public void getMemberList() {
 		List<Member> members = memberRepo.findAll();
 		
@@ -65,5 +65,15 @@ public class MemberTest {
 		Member member = memberRepo.findByMemberId("scott").get();
 		
 		System.out.println(member);
+	}
+	
+	@Test
+	public void checkMember() {
+		Member member = memberRepo.existsByMemberId("scott3");
+		
+		if(member == null)
+			System.out.println("가능한 아이디 입니다.");
+		else
+			System.out.println("중복된 아이디 입니다.");
 	}
 }
