@@ -18,44 +18,47 @@ public class AlertTest {
 	AlertRepository alertRepo;
 	@Autowired
 	RegionRepository regionRepo;
-	
+
 //	@Test
 	public void addAlert() {
 		Region region = regionRepo.findById(1L).get();
-		
-		for(int i=1; i<=5; i++) {			
-			Alert alert = Alert.builder()
-					.region(region)
-					.build();
-			
+
+		for (int i = 1; i <= 5; i++) {
+			Alert alert = Alert.builder().region(region).build();
+
 			alertRepo.save(alert);
 		}
-		
+
 		region = regionRepo.findById(3L).get();
-		for(int i=1; i<=5; i++) {			
-			Alert alert = Alert.builder()
-					.region(region)
-					.build();
-			
+		for (int i = 1; i <= 5; i++) {
+			Alert alert = Alert.builder().region(region).build();
+
 			alertRepo.save(alert);
 		}
-		
+
 		region = regionRepo.findById(15L).get();
-		for(int i=1; i<=5; i++) {			
-			Alert alert = Alert.builder()
-					.region(region)
-					.build();
-			
+		for (int i = 1; i <= 5; i++) {
+			Alert alert = Alert.builder().region(region).build();
+
 			alertRepo.save(alert);
 		}
 	}
-	
-	@Test
+
+//	@Test
 	public void getMemberList() {
 		List<Alert> alerts = alertRepo.findAll();
-		
-		for(int i=0; i<alerts.size(); i++) {
+
+		for (int i = 0; i < alerts.size(); i++) {
 			System.out.println(alerts.get(i));
 		}
+	}
+
+	@Test
+	public void addOneAlert() {
+		Region region = regionRepo.findById(3L).get();
+
+		Alert alert = Alert.builder().region(region).build();
+
+		alertRepo.save(alert);
 	}
 }

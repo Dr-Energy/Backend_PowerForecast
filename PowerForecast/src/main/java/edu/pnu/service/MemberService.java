@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import edu.pnu.DTO.MemberDTO;
 import edu.pnu.DTO.MyPageDTO;
 import edu.pnu.DTO.RegionDTO;
 import edu.pnu.domain.Member;
@@ -83,7 +84,7 @@ public class MemberService {
 
 	}
 
-	public Member updateMemberInfo(Member member) {
+	public MemberDTO updateMemberInfo(Member member) {
 		Member mem = memberRepo.findByMemberId(member.getMemberId()).orElse(null);
 		Region prevRegion = member.getRegion();
 		Region region = regionRepo.findBySidoAndGugunAndEupmyeondong(prevRegion.getSido(), prevRegion.getGugun(),
@@ -97,7 +98,15 @@ public class MemberService {
 			mem.setRegion(region);
 			mem.setPassword(encoder.encode(member.getPassword()));
 			memberRepo.save(mem);
-			return mem;
+			
+			MemberDTO memberDTO = MemberDTO.builder()
+						.nickname(mem.getNickname())
+						.regionId(mem.getRegion().getRegionId())
+						.role(mem.getRole())
+						.memberId(mem.getMemberId())
+						.build();
+						
+			return memberDTO;
 		}
 	}
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.pnu.DTO.MemberDTO;
 import edu.pnu.DTO.MyPageDTO;
 import edu.pnu.domain.Member;
 import edu.pnu.service.MemberService;
@@ -69,11 +70,11 @@ public class MemberController {
 	
 	@PutMapping("/user/profile")
 	public ResponseEntity<?> updateMemberInfo(@RequestBody Member Member){
-		Member result = memberService.updateMemberInfo(Member);
+		MemberDTO result = memberService.updateMemberInfo(Member);
 		if(result == null)
 			return ResponseEntity.badRequest().body("잘못된 요청입니다.");
 		else
-			return ResponseEntity.ok("수정이 되었습니다.");
+			return ResponseEntity.ok(result);
 	}
 	
 	@DeleteMapping("/user/profile/{memberId}")

@@ -1,5 +1,6 @@
 package edu.pnu.persistence;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	Member findByMemberIdAndPhoneNumber(String id, String phoneNum);
 	@Query("Select m from Member m where m.memberId = ?1")
 	Member existsByMemberId(String memberId);
+	List<Member> findAllByRegionRegionId(Long regionId);
 }

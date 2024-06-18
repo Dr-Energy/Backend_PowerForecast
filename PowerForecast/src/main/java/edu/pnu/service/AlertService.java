@@ -13,6 +13,7 @@ import edu.pnu.domain.Alert;
 import edu.pnu.domain.AlertType;
 import edu.pnu.domain.Region;
 import edu.pnu.persistence.AlertRepository;
+import edu.pnu.persistence.MemberRepository;
 import edu.pnu.persistence.RegionRepository;
 
 @Service
@@ -21,6 +22,8 @@ public class AlertService {
 	private AlertRepository alertRepository;
 	@Autowired
 	private RegionRepository regionRepository;
+	@Autowired
+	private MemberRepository memberRepository;
 	
 	public List<AlertDTO> getAlertList(){
 		List<Alert> alertList = alertRepository.findAll();
@@ -101,4 +104,16 @@ public class AlertService {
 		
 		return result;
 	}
+
+	public Alert addAlert(Long regionId, String type) {
+		
+		Alert result = Alert.builder()
+				.alertType(type.equals("이상") ? AlertType.ABNORMAL
+							: type.equals("상승") ? AlertType.INCREASE : AlertType.DECREASE)
+				.region(regionRepository.findById(regionId).get())
+				.build();
+		alertRepository.save(result);
+		return result;
+	}
+
 }
