@@ -15,10 +15,18 @@ public class WeatherController {
 	private WeatherService weatherService;
 	
 	@GetMapping("/main/weather")
-	public ResponseEntity<?> getWeather(@RequestParam String sido,
-            			   @RequestParam String gugun,
-            			   @RequestParam String eupmyeondong) throws Exception {
+	public ResponseEntity<?> getWeather( @RequestParam(required = false) String sido,
+	        							 @RequestParam(required = false) String gugun,
+	        							 @RequestParam(required = false) String eupmyeondong) throws Exception {
+		System.out.println("[날씨 요청]");
 		try {
+			 // 파라미터가 없을 때의 기본 동작을 정의하거나, 기본 값을 설정할 수 있습니다.
+	        if (sido == null || gugun == null || eupmyeondong == null) {
+	            // 기본 값을 설정하거나, 파라미터가 없을 때의 동작을 정의합니다.
+	            sido = (sido == null) ? "서울특별시" : sido;
+	            gugun = (gugun == null) ? "종로구" : gugun;
+	            eupmyeondong = (eupmyeondong == null) ? "청운효자동" : eupmyeondong;
+	        }
 			return ResponseEntity.ok(weatherService.getWeatherData(sido, gugun, eupmyeondong));            
         } catch (Exception e) {
         	return ResponseEntity.badRequest().body(e.getMessage());
