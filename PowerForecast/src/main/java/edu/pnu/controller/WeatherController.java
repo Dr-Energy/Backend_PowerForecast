@@ -27,6 +27,7 @@ public class WeatherController {
 	            gugun = (gugun == null) ? "종로구" : gugun;
 	            eupmyeondong = (eupmyeondong == null) ? "청운효자동" : eupmyeondong;
 	        }
+	        
 			return ResponseEntity.ok(weatherService.getWeatherData(sido, gugun, eupmyeondong));            
         } catch (Exception e) {
         	return ResponseEntity.badRequest().body(e.getMessage());
@@ -35,6 +36,7 @@ public class WeatherController {
 	
 	@GetMapping("/main/weather/{regionId}")
 	public ResponseEntity<?> getWeather(@PathVariable Long regionId) throws Exception{
+		System.out.println("[날씨 요청]");
 		try {
 			return ResponseEntity.ok(weatherService.getWeatherData(regionId));            
         } catch (Exception e) {
