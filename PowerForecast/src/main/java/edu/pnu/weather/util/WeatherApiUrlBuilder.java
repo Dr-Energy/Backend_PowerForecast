@@ -31,7 +31,7 @@ import edu.pnu.domain.Region;
 @Component
 public class WeatherApiUrlBuilder {
 	@Autowired
-	private RestTemplate restTemplate;
+	public RestTemplate restTemplate;
 	@Value("${basic-api-key}")
 	private String basic_api_key;
 	@Value("${decode-api-key}")
@@ -39,16 +39,13 @@ public class WeatherApiUrlBuilder {
 	@Value("${weather-api-key}")
 	private String weather_api_key;
 	
-	private String nx;
-	private String ny;
-	private String lon;
-	private String lat;
 	
 	public List<WeatherDTO> getAPIData(Region regionInfo) throws Exception {
-		nx = regionInfo.getGridX();
-		ny = regionInfo.getGridY();
-		lon = regionInfo.getLongitude();
-		lat = regionInfo.getLatitude();
+
+		String nx = regionInfo.getGridX();
+		String ny = regionInfo.getGridY();
+		String lon = regionInfo.getLongitude();
+		String lat =  regionInfo.getLatitude();
 
 		String[] dates = getDates();
 		String curDate = dates[0];
@@ -62,8 +59,8 @@ public class WeatherApiUrlBuilder {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(new MediaType("application", "JSON", Charset.forName("UTF-8")));
-		URI uri = createAWSURI(baseDate, baseTime);
-		URI uri2 = createWeatherURI(baseDate, curDate, curTime, obs, itv);
+		URI uri = createAWSURI(baseDate, baseTime, nx, ny);
+		URI uri2 = createWeatherURI(baseDate, curDate, curTime, obs, itv, lon, lat);
 
 		ResponseEntity<String> response1 = restTemplate.getForEntity(uri, String.class);
 		ResponseEntity<String> response2 = restTemplate.getForEntity(uri2, String.class);
@@ -84,7 +81,7 @@ public class WeatherApiUrlBuilder {
 
 	}
 
-	public URI createAWSURI(String baseDate, String baseTime) throws UnsupportedEncodingException, URISyntaxException {
+	public URI createAWSURI(String baseDate, String baseTime, String nx, String ny) throws UnsupportedEncodingException, URISyntaxException {
 		String url = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst";
 		String serviceKey = decode_api_key;
 		String encodedServiceKey;
@@ -101,7 +98,7 @@ public class WeatherApiUrlBuilder {
 		return new URI(builder.toString());
 	}
 
-	private URI createWeatherURI(String baseDate, String curDate, String curTime, String obs, String itv)
+	private URI createWeatherURI(String baseDate, String curDate, String curTime, String obs, String itv, String lon, String lat)
 			throws UnsupportedEncodingException, URISyntaxException {
 		String url = "https://apihub.kma.go.kr/api/typ01/url/sfc_nc_var.php";
 		String serviceKey = weather_api_key;

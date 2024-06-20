@@ -28,20 +28,30 @@ public class PowerPredictService {
 		System.out.println(baseDate);
 
 		String baseTime = "2300";
-		URI uri = weatherApiUrlBuilder.createAWSURI(baseDate, baseTime);
+		URI uri = weatherApiUrlBuilder.createAWSURI(baseDate, baseTime, "55", "127");
+		System.out.println(uri);
 
 		ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-
+	    
 		String jsonRes = response.getBody();
+		// 응답 본문 확인
+	    if (jsonRes == null) {
+	        System.out.println("Response body is null.");
+	        return null;
+	    }
 
+	    System.out.println("Response body: " + jsonRes);
+	    
 		// ObjectMapper로 JSON 문자열을 객체로 받아오기
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode root = objectMapper.readTree(jsonRes);
 		JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+		
 		List<SkyItemDTO> items = objectMapper.readValue(itemsNode.toString(), new TypeReference<List<SkyItemDTO>>() {});
 		for(SkyItemDTO item : items) {			
 			System.out.println(item);
 		}
+		
 		System.out.println("[응답 완료]");
 		return null;
 	}
