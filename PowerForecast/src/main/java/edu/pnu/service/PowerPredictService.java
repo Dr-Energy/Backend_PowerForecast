@@ -1,9 +1,12 @@
 package edu.pnu.service;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pnu.DTO.WeatherDTO;
 import edu.pnu.DTO.Response.SkyItemDTO;
 import edu.pnu.weather.util.WeatherApiUrlBuilder;
 
@@ -21,40 +25,80 @@ public class PowerPredictService {
 	private WeatherApiUrlBuilder weatherApiUrlBuilder;
 	@Autowired
 	private RestTemplate restTemplate;
+	@Autowired
+	private 
+	public String getWeatherInfo() throws Exception {
+		
+		String lon = regionInfo.getLongitude();
+		String lat =  regionInfo.getLatitude();
 
-	public String getPredict() throws Exception {
-		String[] dates = weatherApiUrlBuilder.getDates();
+		String[] dates = getDates();
+		String curDate = dates[0];
 		String baseDate = dates[1];
-		System.out.println(baseDate);
 
 		String baseTime = "2300";
-		URI uri = weatherApiUrlBuilder.createAWSURI(baseDate, baseTime, "55", "127");
-		System.out.println(uri);
+		String curTime = getCurrentTimeAdjusted();
+		String itv = "1440";
+		String obs = "ta,hm,rn_60m,ta_chi";
 
-		ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-	    
-		String jsonRes = response.getBody();
-		// 응답 본문 확인
-	    if (jsonRes == null) {
-	        System.out.println("Response body is null.");
-	        return null;
-	    }
+		RestTemplate restTemplate = new RestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(new MediaType("application", "JSON", Charset.forName("UTF-8")));
+		URI uri = createAWSURI(baseDate, baseTime, nx, ny);
+		URI uri2 = createWeatherURI(baseDate, curDate, curTime, obs, itv, lon, lat);
 
-	    System.out.println("Response body: " + jsonRes);
-	    
+		ResponseEntity<String> response1 = restTemplate.getForEntity(uri, String.class);
+		ResponseEntity<String> response2 = restTemplate.getForEntity(uri2, String.class);
+
+		String jsonRes1 = response1.getBody();
+		String jsonRes2 = response2.getBody();
+
 		// ObjectMapper로 JSON 문자열을 객체로 받아오기
 		ObjectMapper objectMapper = new ObjectMapper();
-		JsonNode root = objectMapper.readTree(jsonRes);
+		JsonNode root = objectMapper.readTree(jsonRes1);
 		JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
-		
 		List<SkyItemDTO> items = objectMapper.readValue(itemsNode.toString(), new TypeReference<List<SkyItemDTO>>() {});
-		for(SkyItemDTO item : items) {			
-			System.out.println(item);
-		}
-		
+
+		WeatherDTO weather = filterWeatherData(items, curDate, curTime);
+		List<WeatherDTO> listWeather = parseWeatherData(jsonRes2, weather);
 		System.out.println("[응답 완료]");
+		return listWeather;
 		return null;
 	}
+
+//	public String getPredict() throws Exception {
+//		String[] dates = weatherApiUrlBuilder.getDates();
+//		String baseDate = dates[1];
+//		System.out.println(baseDate);
+//
+//		String baseTime = "2300";
+//		URI uri = weatherApiUrlBuilder.createAWSURI(baseDate, baseTime, "55", "127");
+//		System.out.println(uri);
+//
+//		ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
+//	    
+//		String jsonRes = response.getBody();
+//		// 응답 본문 확인
+//	    if (jsonRes == null) {
+//	        System.out.println("Response body is null.");
+//	        return null;
+//	    }
+//
+//	    System.out.println("Response body: " + jsonRes);
+//	    
+//		// ObjectMapper로 JSON 문자열을 객체로 받아오기
+//		ObjectMapper objectMapper = new ObjectMapper();
+//		JsonNode root = objectMapper.readTree(jsonRes);
+//		JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+//		
+//		List<SkyItemDTO> items = objectMapper.readValue(itemsNode.toString(), new TypeReference<List<SkyItemDTO>>() {});
+//		for(SkyItemDTO item : items) {			
+//			System.out.println(item);
+//		}
+//		
+//		System.out.println("[응답 완료]");
+//		return null;
+//	}
 //	
 //	public String getPredict() {
 //		String url = "http://10.125.121.218:5000/receive-data"; // Flask 서버 URL

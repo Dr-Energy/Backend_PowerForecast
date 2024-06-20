@@ -31,7 +31,7 @@ import edu.pnu.domain.Region;
 @Component
 public class WeatherApiUrlBuilder {
 	@Autowired
-	public RestTemplate restTemplate;
+	private RestTemplate restTemplate;
 	@Value("${basic-api-key}")
 	private String basic_api_key;
 	@Value("${decode-api-key}")
