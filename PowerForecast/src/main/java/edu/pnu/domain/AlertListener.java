@@ -24,7 +24,8 @@ public class AlertListener {
 		System.out.println(msg);
 		if (webSocketConfig != null) {
 			System.out.println("Sending message: " + msg);
-			webSocketConfig.sendPushMessage(alert.getRegion().getRegionId(), msg);
+//			webSocketConfig.sendPushMessage(alert.getRegion().getRegionId(), msg);
+			webSocketConfig.sendPushMessage(alert.getRegion().getRegionId(), alert);
 		} else {
 			System.err.println("WebSocketConfig is null");
 		}

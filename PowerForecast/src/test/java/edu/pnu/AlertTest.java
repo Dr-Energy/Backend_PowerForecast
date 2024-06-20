@@ -5,9 +5,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import edu.pnu.domain.Alert;
-import edu.pnu.domain.Member;
 import edu.pnu.domain.Region;
 import edu.pnu.persistence.AlertRepository;
 import edu.pnu.persistence.RegionRepository;
@@ -53,12 +55,22 @@ public class AlertTest {
 		}
 	}
 
-	@Test
+//	@Test
 	public void addOneAlert() {
 		Region region = regionRepo.findById(3L).get();
 
 		Alert alert = Alert.builder().region(region).build();
 
 		alertRepo.save(alert);
+	}
+	
+	@Test
+	public void getAlertList() {
+//		List<Alert> alerts = alertRepo.findByRegionRegionIdOrderByAlertTimeDesc(1L);
+		List<Alert> alerts = alertRepo.findAll(Sort.by(Direction.ASC, "alertTime"));
+
+		for(Alert alert:alerts) {
+			System.out.println(alert);
+		}
 	}
 }

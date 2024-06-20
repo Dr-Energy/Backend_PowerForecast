@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,8 +20,12 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.pnu.domain.Alert;
 import edu.pnu.domain.Member;
+import edu.pnu.domain.Region;
 import edu.pnu.persistence.MemberRepository;
 import edu.pnu.websocket.CustomHandshakeInterceptor;
 
@@ -46,43 +49,6 @@ public class AppWebSocketConfig extends TextWebSocketHandler implements WebSocke
 				.setHandshakeHandler(new DefaultHandshakeHandler());
 	}
 
-	// Client가 접속 시 호출되는 메서드
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-//        String query = session.getUri().getQuery();
-//        clients.add(session);
-//        if (query != null && query.startsWith("token=")) {
-//            String token = query.replace("token=Bearer ", "");
-//		session.close(CloseStatus.NOT_ACCEPTABLE);
-//		return;
-//	}
-		List<String> protocols = session.getHandshakeHeaders().get("Sec-WebSocket-Protocol");
-
-		if (protocols == null || protocols.isEmpty()) {
-			session.close(CloseStatus.NOT_ACCEPTABLE);
-			return;
-		}
-
-		String token = protocols.get(0).replace("Bearer ", "");
-		String username = JWT.require(Algorithm.HMAC256("edu.pnu.jwt"))
-				.build()
-				.verify(token)
-				.getClaim("username")
-				.asString();
-
-		Member member = memberRepository.findByMemberId(username).orElse(null);
-		if (member != null) {
-			clients.add(session);
-			sessionToRegionMap.put(session, member.getRegion().getRegionId());
-			System.out.println(session + " 클라이언트 접속: " + username);
-			return;
-		} else {
-			System.out.println("찾을 수 없음");
-			session.close(CloseStatus.NOT_ACCEPTABLE);
-		}
-
-	}
-
 	// Client가 접속 해제 시 호출되는 메서드
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
@@ -90,27 +56,70 @@ public class AppWebSocketConfig extends TextWebSocketHandler implements WebSocke
 		clients.remove(session);
 		sessionToRegionMap.remove(session);
 	}
+	
+	// Client가 접속 시 호출되는 메서드
+	@Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        clients.add(session);
+        System.out.println("WebSocket connection established: " + session.getId());
+    }
 
-	// FE에게 정보를 푸시하는 메소드
-	public void sendPushMessage(Long regionId, String message) {
-		if (clients.size() == 0) {
-			System.out.println("No clients connected");
-			return;
-		}
+    @Override
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String payload = message.getPayload();
+        // JSON 형식의 메시지를 파싱하여 토큰을 추출합니다.
+        Map<String, String> msg = new ObjectMapper().readValue(payload, Map.class);
+        if ("authenticate".equals(msg.get("type"))) {
+            String token = msg.get("token").replace("Bearer ", "");
+            String username = JWT.require(Algorithm.HMAC256("edu.pnu.jwt"))
+                                 .build()
+                                 .verify(token)
+                                 .getClaim("username")
+                                 .asString();
 
-		TextMessage textMessage = new TextMessage(message);
+            Member member = memberRepository.findByMemberId(username).orElse(null);
+            if (member != null) {
+                sessionToRegionMap.put(session, member.getRegion().getRegionId());
+                System.out.println(session + " 클라이언트 접속: " + username);
+            } else {
+                System.out.println("찾을 수 없음");
+                session.close(CloseStatus.NOT_ACCEPTABLE);
+            }
+        }
+    }
+    
+    // FE에게 정보를 푸시하는 메소드
+    public void sendPushMessage(Long regionId, Alert alert) {
+        if (clients.isEmpty()) {
+            System.out.println("No clients connected");
+            return;
+        }
+        
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonMessage;
 
-		synchronized (clients) {
-			for (WebSocketSession sess : clients) {
-				if (regionId.equals(sessionToRegionMap.get(sess))) {
-					try {
-						System.out.println("Sending message to session: " + sess.getId());
-						sess.sendMessage(textMessage);
-					} catch (IOException e) {
-						System.out.println(sess.getRemoteAddress() + ":" + e.getMessage());
-					}
-				}
-			}
-		}
-	}
+        try {
+            jsonMessage = objectMapper.writeValueAsString(alert);
+        } catch (JsonProcessingException e) {
+            System.err.println("Error converting Region object to JSON: " + e.getMessage());
+            return;
+        }
+
+        TextMessage textMessage = new TextMessage(jsonMessage);
+
+        synchronized (clients) {
+            for (WebSocketSession sess : clients) {
+                if (regionId.equals(sessionToRegionMap.get(sess))) {
+                    try {
+                        System.out.println("Sending message to session: " + sess.getId());
+                        sess.sendMessage(textMessage);
+                    } catch (IOException e) {
+                        System.out.println(sess.getRemoteAddress() + ": " + e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+
 }

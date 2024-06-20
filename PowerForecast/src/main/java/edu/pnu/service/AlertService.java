@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import edu.pnu.DTO.AlertDTO;
@@ -26,7 +28,8 @@ public class AlertService {
 	private MemberRepository memberRepository;
 	
 	public List<AlertDTO> getAlertList(){
-		List<Alert> alertList = alertRepository.findAll();
+		List<Alert> alertList = alertRepository.findAll(Sort.by(Direction.DESC, "alertTime"));
+		
 		List<AlertDTO> result = new ArrayList<>();
 		
 		for(Alert alert : alertList) {
@@ -50,7 +53,7 @@ public class AlertService {
 	}
 	
 	public List<AlertDTO> getAlertRegionList(Long regionId){
-		List<Alert> alertList = alertRepository.findAllByRegionRegionId(regionId);
+		List<Alert> alertList = alertRepository.findByRegionRegionIdOrderByAlertTimeDesc(regionId);
 		List<AlertDTO> result = new ArrayList<>();
 		
 		for(Alert alert : alertList) {
@@ -82,7 +85,7 @@ public class AlertService {
 	    }
 
 	    Long regionId = regionOptional.get().getRegionId();
-		List<Alert> alertList = alertRepository.findAllByRegionRegionId(regionId);
+		List<Alert> alertList = alertRepository.findByRegionRegionIdOrderByAlertTimeDesc(regionId);
 		List<AlertDTO> result = new ArrayList<>();
 		
 		for(Alert alert : alertList) {
