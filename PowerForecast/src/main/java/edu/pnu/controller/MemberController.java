@@ -41,6 +41,7 @@ public class MemberController {
 	
 	@PostMapping("/user/find/id")
 	public ResponseEntity<?> findId(@RequestBody Member member){
+		System.out.println("[아이디 찾기 호출]: " + member);
 		String result = memberService.findId(member);
 		
 		if(result.equals("찾을 수 없는 회원입니다"))
@@ -51,9 +52,10 @@ public class MemberController {
 	
 	@PostMapping("/user/find/password")
 	public ResponseEntity<?> findPassword(@RequestBody Member member){
+		System.out.println("[비밀번호 찾기 호출]: " + member);
 		String result = memberService.findPassword(member);
 		
-		if(result.equals("찾을 수 없는 회원입니다"))
+		if(result == null)
 			return ResponseEntity.badRequest().body(result);
 		else
 			return ResponseEntity.ok(result);

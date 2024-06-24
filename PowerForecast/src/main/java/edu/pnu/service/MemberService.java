@@ -60,11 +60,11 @@ public class MemberService {
 		Member mem = memberRepo.findByMemberIdAndPhoneNumber(member.getMemberId(), member.getPhoneNumber());
 
 		if (mem == null)
-			return "찾을 수 없는 회원입니다";
+			return null;
 		else {
 			mem.setPassword(encoder.encode("abcd"));
 			memberRepo.save(mem);
-			return "비밀번호가 변경되었습니다";
+			return "abcd";
 		}
 	}
 

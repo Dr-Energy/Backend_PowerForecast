@@ -1,6 +1,7 @@
 package edu.pnu;
 
 import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class PowerPredict {
 		predictRepo.save(req);
 	}
 	
-	@Test
+//	@Test
 	public void addPredict() {
 		PredictRequest req = predictRepo.findById(1L).get();
 		PowerPrediction predict = PowerPrediction.builder()
@@ -41,5 +42,13 @@ public class PowerPredict {
 				.predictTime(new Date())
 				.build();
 		powerPredictRepo.save(predict);
+	}
+	
+	@Test
+	public void findByRequestId() {
+		List<PowerPrediction> list = powerPredictRepo.findAllByRequestSeq(1L);
+		for(PowerPrediction li:list) {			
+			System.out.println(li);
+		}
 	}
 }
