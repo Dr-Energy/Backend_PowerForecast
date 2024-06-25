@@ -56,7 +56,7 @@ public class WeatherApiUrlBuilder {
 		String itv = "1440";
 		String obs = "ta,hm,rn_60m,ta_chi";
 
-		RestTemplate restTemplate = new RestTemplate();
+//		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(new MediaType("application", "JSON", Charset.forName("UTF-8")));
 		URI uri = createAWSURI(baseDate, baseTime, nx, ny);

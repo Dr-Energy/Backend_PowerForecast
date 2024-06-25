@@ -18,8 +18,28 @@ public class PowerPredictController {
 	PowerPredictService powerForecastService;
 	
     @GetMapping("/predict")
-    public ResponseEntity<?> getPredict() {
-    	List<PowerPredictDTO> result = powerForecastService.getPredict();
+    public ResponseEntity<?> getOneDayPredict() {
+    	List<PowerPredictDTO> result = powerForecastService.getOneDayPredict();
+    	if(result != null ) {
+			return ResponseEntity.ok(result);
+		} else {
+			return ResponseEntity.badRequest().body("데이터가 없습니다.");
+		}
+    }
+    
+    @GetMapping("/predict/currentTime")
+    public ResponseEntity<?> getCurrentPredict() {
+    	PowerPredictDTO result = powerForecastService.getCurrentPredict();
+    	if(result != null ) {
+			return ResponseEntity.ok(result);
+		} else {
+			return ResponseEntity.badRequest().body("데이터가 없습니다.");
+		}
+    }
+    
+    @GetMapping("/actual/currentTime")
+    public ResponseEntity<?> getActualCurrent() {
+    	PowerPredictDTO result = powerForecastService.getActualCurrent();
     	if(result != null ) {
 			return ResponseEntity.ok(result);
 		} else {

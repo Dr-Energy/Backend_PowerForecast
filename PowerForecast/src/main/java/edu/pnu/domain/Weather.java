@@ -1,6 +1,7 @@
 package edu.pnu.domain;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,13 +29,15 @@ public class Weather {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "weather_id")
-    private int weatherId;
+    private Long weatherId;
     
-    @ManyToOne
-    @JoinColumn(name = "region_id")
-    private Region region;
+    @Column(name = "grid_num")
+    private String gridNum;
     
-    private String tachi;
+    private String temperature;
     private String humidity;
-    private LocalDateTime timestamp;
+    private Date timestamp;
+    private String wind;
+    @Column(name = "real_power")
+    private Float realPower;
 }

@@ -1,46 +1,36 @@
 package edu.pnu.service;
 
-import java.net.URI;
-import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.pnu.DTO.PowerPredictDTO;
-import edu.pnu.DTO.WeatherDTO;
-import edu.pnu.DTO.Response.SkyItemDTO;
 import edu.pnu.domain.PowerPrediction;
+import edu.pnu.domain.Weather;
 import edu.pnu.persistence.PowerPredictionRepository;
-import edu.pnu.persistence.RegionRepository;
-import edu.pnu.weather.util.WeatherApiUrlBuilder;
+import edu.pnu.persistence.WeatherRepository;
 
 @Service
 public class PowerPredictService {
 	@Autowired
-	private WeatherApiUrlBuilder weatherApiUrlBuilder;
-	@Autowired
-	private RestTemplate restTemplate;
-	@Autowired
-	private RegionRepository regionRepository;
-	@Autowired
 	private PowerPredictionRepository powerPreRepository;
+	@Autowired
+	private WeatherRepository weatherRepository;
 	
-	public List<PowerPredictDTO> getPredict() {
+	public List<PowerPredictDTO> getOneDayPredict() {
 		List<PowerPrediction> preList = powerPreRepository.findAllByRequestSeq(1L);
 		
 		List<PowerPredictDTO> preDTOList = new ArrayList<>();
 		for(PowerPrediction power:preList) {
-			System.out.println(power.getPredictTime());
+//			System.out.println(power.getPredictTime());
 			PowerPredictDTO dto = PowerPredictDTO.builder()
 					.power(power.getPower())
 					.time(power.getPredictTime())
@@ -49,68 +39,51 @@ public class PowerPredictService {
 		}
 		return preDTOList;
 	}
-//	public String getWeatherInfo() throws Exception {
-		
-//		String lon = regionInfo.getLongitude();
-//		String lat =  regionInfo.getLatitude();
-//
-//		String[] dates = getDates();
-//		String curDate = dates[0];
-//		String baseDate = dates[1];
-//
-//		String baseTime = "2300";
-//		String curTime = getCurrentTimeAdjusted();
-//		String itv = "1440";
-//		String obs = "ta,hm,rn_60m,ta_chi";
-//
-//		RestTemplate restTemplate = new RestTemplate();
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(new MediaType("application", "JSON", Charset.forName("UTF-8")));
-//		URI uri = createAWSURI(baseDate, baseTime, nx, ny);
-//		URI uri2 = createWeatherURI(baseDate, curDate, curTime, obs, itv, lon, lat);
-//
-//		ResponseEntity<String> response1 = restTemplate.getForEntity(uri, String.class);
-//		ResponseEntity<String> response2 = restTemplate.getForEntity(uri2, String.class);
-//
-//		String jsonRes1 = response1.getBody();
-//		String jsonRes2 = response2.getBody();
-//
-//		// ObjectMapper로 JSON 문자열을 객체로 받아오기
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		JsonNode root = objectMapper.readTree(jsonRes1);
-//		JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
-//		List<SkyItemDTO> items = objectMapper.readValue(itemsNode.toString(), new TypeReference<List<SkyItemDTO>>() {});
-//
-//		WeatherDTO weather = filterWeatherData(items, curDate, curTime);
-//		List<WeatherDTO> listWeather = parseWeatherData(jsonRes2, weather);
-//		System.out.println("[응답 완료]");
-//		return listWeather;
-//		return null;
-//	}
-
 	
-//	
-//	public String getPredict() {
-//		String url = "http://10.125.121.218:5000/receive-data"; // Flask 서버 URL
-//
-//		System.out.println("[데이터 전송]");
-//		// 데이터 생성
-//		Map<String, String> data = new HashMap<>();
-//		data.put("sido", "서울임");
-//		data.put("gugun", "Gangnam");
-//		data.put("eupmyeondong", "Apgujeong");
-//
-//		// 헤더 설정
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//		// 요청 엔티티 생성
-//		HttpEntity<Map<String, String>> request = new HttpEntity<>(data, headers);
-//
-//		// RestTemplate으로 POST 요청 전송
-//		RestTemplate restTemplate = new RestTemplate();
-//		ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-//
-//		return response.getBody();
-//	}
+	public PowerPredictDTO getCurrentPredict() {
+		
+		Date convertedDate = createDate();
+       
+        
+        // PowerPreRepository를 사용하여 Date를 기반으로 검색
+        PowerPrediction prediction = powerPreRepository.findByPredictTime(convertedDate);
+        PowerPredictDTO result = PowerPredictDTO.builder()
+        		.power(prediction.getPower())
+        		.time(prediction.getPredictTime())
+        		.build();
+		return result;
+	}
+	
+	public PowerPredictDTO getActualCurrent() {
+        Date convertedDate = createDate();
+        
+        // PowerPreRepository를 사용하여 Date를 기반으로 검색
+        Weather weather = weatherRepository.findByTimestampAndGridNum(convertedDate, "5565");
+        PowerPredictDTO result = PowerPredictDTO.builder()
+        		.power(weather.getRealPower())
+        		.time(weather.getTimestamp())
+        		.build();
+		return result;
+	}
+	
+	private Date createDate() {
+		// 특정 날짜
+        String specificDate = "20210101";
+        // 현재 시간
+        LocalTime currentTime = LocalTime.now();
+        // 시간을 정각으로 맞추기
+        LocalTime roundedTime = currentTime.withMinute(0).withSecond(0).withNano(0);
+        // 날짜 형식 지정
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        // LocalDate 객체 생성
+        LocalDate date = LocalDate.parse(specificDate, dateFormatter);
+        // LocalDateTime 객체 생성 (특정 날짜 + 정각 시간)
+        LocalDateTime dateTime = LocalDateTime.of(date, roundedTime);
+        // LocalDateTime을 Date로 변환
+        Date convertedDate = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+        
+        // 결과 출력
+        System.out.println("Combined Date and Time: " + dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        return convertedDate;
+	}
 }
