@@ -38,7 +38,7 @@ public class PowerPredict {
 		PredictRequest req = predictRepo.findById(1L).get();
 		PowerPrediction predict = PowerPrediction.builder()
 				.request(req)
-				.power(94.6f)
+				.power("94.6")
 				.predictTime(new Date())
 				.build();
 		powerPredictRepo.save(predict);

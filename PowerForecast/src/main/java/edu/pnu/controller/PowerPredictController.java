@@ -1,10 +1,12 @@
 package edu.pnu.controller;
 
+import java.text.ParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.pnu.DTO.PowerPredictDTO;
@@ -16,6 +18,11 @@ public class PowerPredictController {
 
 	@Autowired
 	PowerPredictService powerForecastService;
+	
+	@GetMapping("/require/predict/{regionId}")
+	public void requestPredict(@PathVariable Long regionId) throws ParseException {
+		powerForecastService.requestPredict(regionId);
+	}
 	
     @GetMapping("/predict")
     public ResponseEntity<?> getOneDayPredict() {
@@ -46,4 +53,6 @@ public class PowerPredictController {
 			return ResponseEntity.badRequest().body("데이터가 없습니다.");
 		}
     }
+    
+//    @GetMapping
 }

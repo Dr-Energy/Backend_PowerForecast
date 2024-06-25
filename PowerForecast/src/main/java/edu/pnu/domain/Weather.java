@@ -1,6 +1,5 @@
 package edu.pnu.domain;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -8,8 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,10 +31,13 @@ public class Weather {
     @Column(name = "grid_num")
     private String gridNum;
     
-    private String temperature;
-    private String humidity;
     private Date timestamp;
-    private String wind;
-    @Column(name = "real_power")
-    private Float realPower;
+    private String hh24;
+    @Column(name = "week_name")
+    private String weekName;
+    private String temp;
+    @Column(name = "body_temp")
+    private String bodyTemp;
+    @Column(name = "elect_power")
+    private String electPower;
 }

@@ -1,5 +1,7 @@
 package edu.pnu;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -20,10 +22,10 @@ public class WeatherTest {
 	@Autowired
 	WeatherRepository weatherRepository;
 	
-	@Test
+//	@Test
 	public void getActualPower() {
 		// 특정 날짜
-        String specificDate = "20210101";
+        String specificDate = "20220101";
         // 현재 시간
         LocalTime currentTime = LocalTime.now();
         // 시간을 정각으로 맞추기
@@ -47,5 +49,20 @@ public class WeatherTest {
 		for(Weather weather:list) {
 			System.out.println(weather);
 		}
+	}
+	
+	@Test
+	public void getBetween() throws ParseException {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		Date startDate = dateFormat.parse("2022-01-01 00:00:00");
+        Date endDate = dateFormat.parse("2022-01-02 00:00:00");
+        
+		List<Weather> list = weatherRepository.findAllByGridNumAndTimestampBetween("5566", startDate, endDate);
+		
+		for(Weather w : list) {
+			System.out.println(w);
+		}
+	
 	}
 }

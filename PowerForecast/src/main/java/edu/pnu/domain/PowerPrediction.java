@@ -34,6 +34,6 @@ public class PowerPrediction {
 	@JoinColumn(name = "request_id", nullable = false)
 	private PredictRequest request;
 
-    private Float power;
+    private String power;
     private Date predictTime;
 }
