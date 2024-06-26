@@ -21,9 +21,11 @@ import org.springframework.web.client.RestTemplate;
 import edu.pnu.DTO.FlaskReqDTO;
 import edu.pnu.DTO.PowerPredictDTO;
 import edu.pnu.domain.PowerPrediction;
+import edu.pnu.domain.PredictRequest;
 import edu.pnu.domain.Region;
 import edu.pnu.domain.Weather;
 import edu.pnu.persistence.PowerPredictionRepository;
+import edu.pnu.persistence.PredictRequestRepository;
 import edu.pnu.persistence.RegionRepository;
 import edu.pnu.persistence.WeatherRepository;
 
@@ -35,6 +37,8 @@ public class PowerPredictService {
 	private WeatherRepository weatherRepository;
 	@Autowired
 	private RegionRepository regionRepository;
+	@Autowired
+	private PredictRequestRepository predictReqRepository;
 	@Autowired
 	private RestTemplate restTemplate;
 
@@ -74,17 +78,49 @@ public class PowerPredictService {
 		}
 
 	}
-
-	public List<PowerPredictDTO> getOneDayPredict() {
-		List<PowerPrediction> preList = powerPreRepository.findAllByRequestSeq(1L);
-
-		List<PowerPredictDTO> preDTOList = new ArrayList<>();
-		for (PowerPrediction power : preList) {
-			PowerPredictDTO dto = PowerPredictDTO.builder().power(power.getPower()).time(power.getPredictTime())
-					.build();
-			preDTOList.add(dto);
+	
+	public List<PowerPredictDTO> getOneDayPredict(String sido, String gugun, String eupmyeondong) throws ParseException {
+		Region region = regionRepository.findBySidoAndGugunAndEupmyeondong(sido, gugun, eupmyeondong).get();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = sdf.parse("2024-06-19");
+		PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(region.getRegionId(), date);
+		
+		if(preReq != null) {
+			List<PowerPrediction> powerList = powerPreRepository.findByRequestSeq(preReq.getSeq());
+			List<PowerPredictDTO> powerDTOList = powerList.stream().map(PowerPredictDTO::convertToDTO)
+					.collect(Collectors.toList());
+			System.out.println("[하루 예측 데이터 요청: 비로그인]");
+//			for(PowerPredictDTO dto: powerDTOList)
+//				System.out.println(dto);
+			return powerDTOList;
+		} else {
+			// flask서버에 요청해서 결과 받아오기
 		}
-		return preDTOList;
+		
+		return null;
+	}
+	
+	public List<PowerPredictDTO> getOneDayPredict(Long regionId) throws ParseException {
+		Region region = regionRepository.findById(regionId).get();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = sdf.parse("2024-06-26");
+		PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(region.getRegionId(), date);
+		
+		if(preReq != null) {
+			List<PowerPrediction> powerList = powerPreRepository.findByRequestSeq(preReq.getSeq());
+			List<PowerPredictDTO> powerDTOList = powerList.stream().map(PowerPredictDTO::convertToDTO)
+					.collect(Collectors.toList());
+			System.out.println("[하루 예측 데이터 요청: 로그인]");
+//			for(PowerPredictDTO dto: powerDTOList)
+//				System.out.println(dto);
+			return powerDTOList;
+		} else {
+			// flask서버에 요청해서 결과 받아오기
+		}
+		
+		return null;
 	}
 
 	public PowerPredictDTO getCurrentPredict() {
@@ -132,4 +168,8 @@ public class PowerPredictService {
 				"Combined Date and Time: " + dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 		return convertedDate;
 	}
+
+	
+
+	
 }
