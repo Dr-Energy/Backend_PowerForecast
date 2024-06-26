@@ -12,16 +12,21 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.pnu.DTO.FlaskReqDTO;
 import edu.pnu.DTO.PowerPredictDTO;
+import edu.pnu.DTO.Response.FlaskResDTO;
 import edu.pnu.domain.PowerPrediction;
 import edu.pnu.domain.PredictRequest;
 import edu.pnu.domain.Region;
@@ -43,46 +48,52 @@ public class PowerPredictService {
 	private PredictRequestRepository predictReqRepository;
 	@Autowired
 	private RestTemplate restTemplate;
+	@Autowired
+	private ObjectMapper objectMapper;
 
-	public void requestPredict(Long regionId) throws ParseException {
+	public void requestPredict(Long regionId) throws Exception {
 		Region region = regionRepository.findById(regionId).get();
-		
+
 		Date today = createDate("20210101");
 		PredictRequest predictReq = predictReqRepository.findByRegionRegionIdAndRequestDate(regionId, today);
-		
+
 		if (predictReq == null) {
-			PredictRequest newReq = PredictRequest.builder()
-					.region(region)
-					.requestDate(today)
-					.build();
+			PredictRequest newReq = PredictRequest.builder().region(region).requestDate(today).build();
 			predictReqRepository.save(newReq);
 			predictReq = newReq;
-		}
-		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		Date startDate = dateFormat.parse("2022-01-01 00:00:00");
-		Date endDate = dateFormat.parse("2022-01-02 00:00:00");
-		
-		List<Weather> weatherList = weatherRepository.findAllByGridNumAndTimestampBetween(region.getGridNum(), startDate, endDate);
-		List<FlaskReqDTO> weatherDTOList = weatherList.stream().map(FlaskReqDTO::convertToDTO)
-				.collect(Collectors.toList());
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		// list확인하기 위한 출력
-		for (FlaskReqDTO dto : weatherDTOList) {
-			System.out.println(dto);
-		}
+			Date startDate = dateFormat.parse("2022-01-01 00:00:00");
+			Date endDate = dateFormat.parse("2022-01-01 23:00:00");
 
-		for (FlaskReqDTO dto : weatherDTOList) {
-			ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000/predict", dto,
-					String.class);
-			System.out.println(response);
-			System.out.println("=".repeat(50));
-//			// 응답을 DB에 저장
-//			Response responseEntity = new Response();
-//			responseEntity.setWeatherId(weather.getWeatherId()); // Weather 엔티티의 ID 필드 이름에 맞게 변경
-//			responseEntity.setResponse(response.getBody());
-//			responseRepository.save(responseEntity);
+			List<Weather> weatherList = weatherRepository.findAllByGridNumAndTimestampBetween(region.getGridNum(),
+					startDate, endDate);
+			List<FlaskReqDTO> weatherDTOList = weatherList.stream().map(FlaskReqDTO::convertToDTO)
+					.collect(Collectors.toList());
+
+			// list확인하기 위한 출력
+//			for (FlaskReqDTO dto : weatherDTOList) {
+//				System.out.println(dto);
+//			}
+
+			for (FlaskReqDTO dto : weatherDTOList) {
+				ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000/predict", dto,
+						String.class);
+				System.out.println(response);
+				System.out.println("=".repeat(50));
+				// 응답을 처리하여 PredictionResult 엔티티에 저장
+				if (response.getStatusCode() == HttpStatus.OK) {
+					// JSON 응답을 FlaskResponseDTO로 변환
+					FlaskResDTO flaskResponse = objectMapper.readValue(response.getBody(), FlaskResDTO.class);
+
+					// 응답을 DB에 저장
+					PowerPrediction powerPrediction = PowerPrediction.builder().request(predictReq)
+							.predictTime(flaskResponse.getTimestamp()).power(flaskResponse.getPrediction()).build();
+
+					powerPreRepository.save(powerPrediction);
+				}
+			}
 		}
 
 	}

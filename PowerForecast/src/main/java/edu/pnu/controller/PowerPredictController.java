@@ -1,8 +1,5 @@
 package edu.pnu.controller;
 
-import java.text.ParseException;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.pnu.DTO.PowerPredictDTO;
-import edu.pnu.domain.PowerPrediction;
 import edu.pnu.service.PowerPredictService;
 
 @RestController
@@ -21,7 +16,7 @@ public class PowerPredictController {
 	PowerPredictService powerForecastService;
 	
 	@GetMapping("/require/predict/{regionId}")
-	public void requestPredict(@PathVariable Long regionId) throws ParseException {
+	public void requestPredict(@PathVariable Long regionId) throws Exception {
 		powerForecastService.requestPredict(regionId);
 	}
 	
