@@ -24,8 +24,6 @@ public class AlertService {
 	private AlertRepository alertRepository;
 	@Autowired
 	private RegionRepository regionRepository;
-	@Autowired
-	private MemberRepository memberRepository;
 	
 	public List<AlertDTO> getAlertList(){
 		List<Alert> alertList = alertRepository.findAll(Sort.by(Direction.DESC, "alertTime"));

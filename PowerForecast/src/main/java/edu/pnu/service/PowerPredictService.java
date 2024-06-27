@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -27,10 +28,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.pnu.DTO.FlaskReqDTO;
 import edu.pnu.DTO.PowerPredictDTO;
 import edu.pnu.DTO.Response.FlaskResDTO;
+import edu.pnu.domain.Alert;
+import edu.pnu.domain.AlertType;
 import edu.pnu.domain.PowerPrediction;
 import edu.pnu.domain.PredictRequest;
 import edu.pnu.domain.Region;
 import edu.pnu.domain.Weather;
+import edu.pnu.persistence.AlertRepository;
 import edu.pnu.persistence.PowerPredictionRepository;
 import edu.pnu.persistence.PredictRequestRepository;
 import edu.pnu.persistence.RegionRepository;
@@ -47,54 +51,107 @@ public class PowerPredictService {
 	@Autowired
 	private PredictRequestRepository predictReqRepository;
 	@Autowired
+	private AlertRepository alertRepository;
+	@Autowired
 	private RestTemplate restTemplate;
 	@Autowired
 	private ObjectMapper objectMapper;
 
+    private List<Long> getRegionIds() {
+    	//448L, 469L, 470L, 553L, 556L, 557L,
+        return Arrays.asList(
+        		558L, 559L, 560L, 561L, 562L, 563L, 564L, 565L, 566L, 592L, 938L,
+                940L, 949L, 950L, 951L, 952L, 953L, 954L, 955L, 956L, 957L, 958L, 959L, 960L, 961L, 962L, 963L, 964L,
+                965L, 966L, 967L, 969L, 970L, 971L, 972L, 973L, 974L, 975L, 976L, 977L, 978L, 979L, 980L, 981L, 982L,
+                983L, 984L, 985L, 986L, 988L, 989L, 990L, 1013L, 1014L, 1015L, 1016L, 1017L, 1018L, 1029L, 1030L, 2399L,
+                2400L, 2401L, 2405L, 2406L, 2407L, 2408L, 2409L, 2410L, 2411L, 2414L, 2417L, 2420L, 2429L, 2430L, 2431L,
+                2434L, 2435L, 2436L, 2437L, 2450L, 2470L, 2485L, 2599L, 2613L, 3034L, 3073L, 3076L, 3104L, 3111L, 3112L,
+                3116L, 3117L, 3121L, 3123L, 3168L, 3169L, 3343L, 3355L, 3356L, 3357L, 3358L
+        );
+    }
+
 	public void requestPredict(Long regionId) throws Exception {
-		Region region = regionRepository.findById(regionId).get();
+		List<Long> regionIds = getRegionIds();
+		
+		for(Long id: regionIds) {
+			System.out.println("Id: " + id);
+			Region region = regionRepository.findById(id).get();
 
-		Date today = createDate("20210101");
-		PredictRequest predictReq = predictReqRepository.findByRegionRegionIdAndRequestDate(regionId, today);
+			Date today = createDate("20220101");
+			PredictRequest predictReq = predictReqRepository.findByRegionRegionIdAndRequestDate(id, today);
 
-		if (predictReq == null) {
-			PredictRequest newReq = PredictRequest.builder().region(region).requestDate(today).build();
-			predictReqRepository.save(newReq);
-			predictReq = newReq;
+			if (predictReq == null) {
+				PredictRequest newReq = PredictRequest.builder().region(region).requestDate(today).build();
+				predictReqRepository.save(newReq);
+				predictReq = newReq;
 
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-			Date startDate = dateFormat.parse("2022-01-01 00:00:00");
-			Date endDate = dateFormat.parse("2022-01-01 23:00:00");
+				Date startDate = dateFormat.parse("2022-01-01 00:00:00");
+				Date endDate = dateFormat.parse("2022-01-01 23:00:00");
 
-			List<Weather> weatherList = weatherRepository.findAllByGridNumAndTimestampBetween(region.getGridNum(),
-					startDate, endDate);
-			List<FlaskReqDTO> weatherDTOList = weatherList.stream().map(FlaskReqDTO::convertToDTO)
-					.collect(Collectors.toList());
+				List<Weather> weatherList = weatherRepository.findAllByGridNumAndTimestampBetween(region.getGridNum(),
+						startDate, endDate);
+				List<FlaskReqDTO> weatherDTOList = weatherList.stream().map(FlaskReqDTO::convertToDTO)
+						.collect(Collectors.toList());
+				
+				Date prevDate = dateFormat.parse("2021-12-31 23:00:00");
+				float prevPower = Float.parseFloat(weatherRepository.findByTimestampAndGridNum(prevDate, region.getGridNum())
+																	.getElectPower());
+				
+				for (FlaskReqDTO dto : weatherDTOList) {
+					
+					ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000/predict", dto,
+							String.class);
+					System.out.println(response);
+					System.out.println("=".repeat(50));
+					// 응답을 처리하여 PredictionResult 엔티티에 저장
+					if (response.getStatusCode() == HttpStatus.OK) {
+						// JSON 응답을 FlaskResponseDTO로 변환
+						FlaskResDTO flaskResponse = objectMapper.readValue(response.getBody(), FlaskResDTO.class);
 
-			// list확인하기 위한 출력
-//			for (FlaskReqDTO dto : weatherDTOList) {
-//				System.out.println(dto);
-//			}
+						// 응답을 DB에 저장
+						PowerPrediction powerPrediction = PowerPrediction.builder().request(predictReq)
+								.predictTime(flaskResponse.getTimestamp()).power(flaskResponse.getPrediction()).build();
 
-			for (FlaskReqDTO dto : weatherDTOList) {
-				ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:5000/predict", dto,
-						String.class);
-				System.out.println(response);
-				System.out.println("=".repeat(50));
-				// 응답을 처리하여 PredictionResult 엔티티에 저장
-				if (response.getStatusCode() == HttpStatus.OK) {
-					// JSON 응답을 FlaskResponseDTO로 변환
-					FlaskResDTO flaskResponse = objectMapper.readValue(response.getBody(), FlaskResDTO.class);
+						powerPreRepository.save(powerPrediction);
+						
+						System.out.println("*".repeat(50));
+						System.out.println("prev: " + prevPower);
+						System.out.println("cur: " + powerPrediction.getPower());
+						
+						
+						float usageIncrease = powerPrediction.getPower() - prevPower;
+				        float increasePercentage = (usageIncrease / prevPower) * 100;
+				        
+				        System.out.println("increasePercent: " + increasePercentage);
+				        System.out.println("*".repeat(50));
+				        AlertType alertType = null;
 
-					// 응답을 DB에 저장
-					PowerPrediction powerPrediction = PowerPrediction.builder().request(predictReq)
-							.predictTime(flaskResponse.getTimestamp()).power(flaskResponse.getPrediction()).build();
+				        if (increasePercentage >= 5) {
+				            alertType = AlertType.ABNORMAL;
+				        } else if (usageIncrease > 0) {
+				            alertType = AlertType.INCREASE;
+				        } else if (usageIncrease < 0) {
+				            alertType = AlertType.DECREASE;
+				        }
 
-					powerPreRepository.save(powerPrediction);
+				        if (alertType != null) {
+				            Alert alert = Alert.builder()
+				            		.region(region)
+				            		.alertTime(powerPrediction.getPredictTime())
+				            		.alertType(alertType)
+				            		.build();
+
+				            alertRepository.save(alert);
+				        }
+				        
+				        prevPower = powerPrediction.getPower();
+					}
 				}
 			}
 		}
+		
 
 	}
 	
@@ -103,7 +160,7 @@ public class PowerPredictService {
 		Region region = regionRepository.findBySidoAndGugunAndEupmyeondong(sido, gugun, eupmyeondong).get();
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = sdf.parse("2024-06-19");
+		Date date = sdf.parse("2022-01-01");
 		
 		List<PowerPredictDTO> result = getOneDayData(region.getRegionId(), date);
 		return result;
@@ -112,7 +169,7 @@ public class PowerPredictService {
 	public List<PowerPredictDTO> getOneDayPredict(Long regionId) throws ParseException {
 		System.out.println("[하루 예측 데이터 요청: 로그인]");
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = sdf.parse("2024-06-26");
+		Date date = sdf.parse("2022-01-01");
 		
 		List<PowerPredictDTO> result = getOneDayData(regionId, date);
 		return result;
@@ -175,79 +232,33 @@ public class PowerPredictService {
         
         return dailyAverages;
 	}
-
-//	public PowerPredictDTO getCurrentPredict() {
-//		
-//		Date convertedDate = createDate("20210101");
-//
-//		// PowerPreRepository를 사용하여 Date를 기반으로 검색
-//		PowerPrediction prediction = powerPreRepository.findByPredictTime(convertedDate);
-//		PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
-//				.time(prediction.getPredictTime()).build();
-//		return result;
-//	}
 	
 	public PowerPredictDTO getCurrentPredict(String sido, String gugun, String eupmyeondong) throws Exception {
 		System.out.println("[현재시각 예측 데이터 요청: 비로그인]");
 		Region region = regionRepository.findBySidoAndGugunAndEupmyeondong(sido, gugun, eupmyeondong).get();
 		System.out.println(region.getRegionId());
-		Date convertedDate = null;
-		if(region.getRegionId().equals(1L) ) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Date date = sdf.parse("2024-06-19");
-			PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(region.getRegionId(), date);
-			convertedDate = createDate("20210101");
-			PowerPrediction prediction = powerPreRepository.findByPredictTimeAndRequestSeq(convertedDate, preReq.getSeq());
-			PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
-					.time(prediction.getPredictTime()).build();
-			return result;
-		} else {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Date date = sdf.parse("2024-06-26");
-			PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(region.getRegionId(), date);
-			convertedDate = createDate("20211231");
-			PowerPrediction prediction = powerPreRepository.findByPredictTimeAndRequestSeq(convertedDate, preReq.getSeq());
-			PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
-					.time(prediction.getPredictTime()).build();
-			return result;	
-		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = sdf.parse("2022-01-01");
+		PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(region.getRegionId(), date);
+		Date convertedDate = createDate("20220101");
+		PowerPrediction prediction = powerPreRepository.findByPredictTimeAndRequestSeq(convertedDate, preReq.getSeq());
+		PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
+				.time(prediction.getPredictTime()).build();
+		return result;
 	}
 	
 	public PowerPredictDTO getCurrentPredict(Long regionId) throws Exception {
 		System.out.println("[현재시각 예측 데이터 요청: 로그인]");
-		Date convertedDate = null;
-		if(regionId.equals(1L) ) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Date date = sdf.parse("2024-06-19");
-			PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(regionId, date);
-			convertedDate = createDate("20210101");
-			PowerPrediction prediction = powerPreRepository.findByPredictTimeAndRequestSeq(convertedDate, preReq.getSeq());
-			PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
-					.time(prediction.getPredictTime()).build();
-			return result;
-		} else {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Date date = sdf.parse("2024-06-26");
-			PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(regionId, date);
-			convertedDate = createDate("20211231");
-			PowerPrediction prediction = powerPreRepository.findByPredictTimeAndRequestSeq(convertedDate, preReq.getSeq());
-			PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
-					.time(prediction.getPredictTime()).build();
-			return result;	
-		}
-	}
-
-	public PowerPredictDTO getActualCurrent() {
-		Date convertedDate = createDate("20210101");
-
-//        // PowerPreRepository를 사용하여 Date를 기반으로 검색
-//        Weather weather = weatherRepository.findByTimestampAndGridNum(convertedDate, "5565");
-//        PowerPredictDTO result = PowerPredictDTO.builder()
-//        		.power(weather.getRealPower())
-//        		.time(weather.getTimestamp())
-//        		.build();
-//		return result;
-		return null;
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = sdf.parse("2022-01-01");
+		PredictRequest preReq = predictReqRepository.findByRegionRegionIdAndRequestDate(regionId, date);
+		Date convertedDate = createDate("20220101");
+		PowerPrediction prediction = powerPreRepository.findByPredictTimeAndRequestSeq(convertedDate, preReq.getSeq());
+		PowerPredictDTO result = PowerPredictDTO.builder().power(prediction.getPower())
+				.time(prediction.getPredictTime()).build();
+		return result;
 	}
 	
 	public PowerPredictDTO getCurrentActual(String sido, String gugun, String eupmyeondong) throws Exception {
@@ -295,9 +306,4 @@ public class PowerPredictService {
 				"Combined Date and Time: " + dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 		return convertedDate;
 	}
-
-	
-
-	
-
 }

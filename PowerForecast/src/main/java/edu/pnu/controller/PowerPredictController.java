@@ -29,9 +29,9 @@ public class PowerPredictController {
 			 // 파라미터가 없을 때의 기본 동작을 정의하거나, 기본 값을 설정할 수 있습니다.
 	        if (sido == null || gugun == null || eupmyeondong == null) {
 	            // 기본 값을 설정하거나, 파라미터가 없을 때의 동작을 정의합니다.
-	            sido = (sido == null) ? "서울특별시" : sido;	// 부산광역시
-	            gugun = (gugun == null) ? "종로구" : gugun;		// 서구
-	            eupmyeondong = (eupmyeondong == null) ? "청운효자동" : eupmyeondong;	// 암남동
+	            sido = (sido == null) ? "부산광역시" : sido;	// 부산광역시
+	            gugun = (gugun == null) ? "서구" : gugun;		// 서구
+	            eupmyeondong = (eupmyeondong == null) ? "암남동" : eupmyeondong;	// 암남동
 	        }
 	        
 			return ResponseEntity.ok(powerForecastService.getOneDayPredict(sido, gugun, eupmyeondong));            
@@ -76,16 +76,6 @@ public class PowerPredictController {
         }
 	}
 	
-//    @GetMapping("/predict/currentTime")
-//    public ResponseEntity<?> getCurrentPredict() {
-//    	PowerPredictDTO result = powerForecastService.getCurrentPredict();
-//    	if(result != null ) {
-//			return ResponseEntity.ok(result);
-//		} else {
-//			return ResponseEntity.badRequest().body("데이터가 없습니다.");
-//		}
-//    }
-//    
     @GetMapping("/predict/currentTime")
     public ResponseEntity<?> getCurrentPredict(@RequestParam(required = false) String sido,
 			 									@RequestParam(required = false) String gugun,
@@ -94,9 +84,9 @@ public class PowerPredictController {
 			 // 파라미터가 없을 때의 기본 동작을 정의하거나, 기본 값을 설정할 수 있습니다.
 	        if (sido == null || gugun == null || eupmyeondong == null) {
 	            // 기본 값을 설정하거나, 파라미터가 없을 때의 동작을 정의합니다.
-	            sido = (sido == null) ? "서울특별시" : sido;	// 부산광역시
-	            gugun = (gugun == null) ? "종로구" : gugun;		// 서구
-	            eupmyeondong = (eupmyeondong == null) ? "청운효자동" : eupmyeondong;	// 암남동
+	            sido = (sido == null) ? "부산광역시" : sido;	// 부산광역시
+	            gugun = (gugun == null) ? "서구" : gugun;		// 서구
+	            eupmyeondong = (eupmyeondong == null) ? "암남동" : eupmyeondong;	// 암남동
 	        }
 	        
 			return ResponseEntity.ok(powerForecastService.getCurrentPredict(sido, gugun, eupmyeondong));            

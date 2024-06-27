@@ -22,7 +22,7 @@ public class AlertListener {
 					+ alert.getRegion().getEupmyeondong() + " " + sdf.format(alert.getAlertTime())
 					+ " 전력 수요 " + alertType + "이 예상됩니다.";
 		System.out.println(msg);
-		if (webSocketConfig != null) {
+		if (webSocketConfig != null && alertType.equals("이상")) {
 			System.out.println("Sending message: " + msg);
 //			webSocketConfig.sendPushMessage(alert.getRegion().getRegionId(), msg);
 			webSocketConfig.sendPushMessage(alert.getRegion().getRegionId(), alert);
