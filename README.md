@@ -29,7 +29,7 @@ PowerForecast Backend
     - 상승, 하락, 이상 알람
 
 ## 구현 결과
-#### [ 클릭해여 재생해주세요 ]
+#### [ 클릭하여 재생해주세요 ]
 [![Video Label](https://github.com/user-attachments/assets/ec913ef7-e281-4db6-8765-eef6ebbb1a9d)](https://www.youtube.com/watch?v=izu8rs2vhy0)
 
 ## EER-Diagram
